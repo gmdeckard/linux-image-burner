@@ -1,0 +1,12 @@
+[Desktop Entry]
+Version=1.0
+Type=Application
+Name=Linux Image Burner
+Comment=Create bootable USB drives from disk images
+GenericName=Image Burner
+Keywords=usb;iso;img;burn;rufus;bootable;
+Exec=/usr/local/bin/linux-image-burner
+Icon=drive-removable-media
+Terminal=false
+Categories=System;Utility;
+MimeType=application/x-cd-image;application/x-raw-disk-image;
