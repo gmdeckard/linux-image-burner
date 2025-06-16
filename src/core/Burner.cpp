@@ -209,6 +209,12 @@ void Burner::onProcessFinished(int exitCode, QProcess::ExitStatus exitStatus)
     
     m_progressTimer->stop();
     
+    // Ensure we show 100% when process completes successfully
+    if (exitCode == 0) {
+        emit progressChanged(100);
+        emit statusChanged("USB burning completed successfully!");
+    }
+    
     // Clean up temporary script files
     QDir tmpDir("/tmp");
     QStringList scriptFiles = tmpDir.entryList(QStringList() << "burn_script_*.sh", QDir::Files);
@@ -219,8 +225,7 @@ void Burner::onProcessFinished(int exitCode, QProcess::ExitStatus exitStatus)
     if (m_isCancelled) {
         emit burnFinished(false, "Operation cancelled");
     } else if (exitCode == 0) {
-        // Sync the device
-        syncDevice(m_currentOptions.devicePath);
+        // Note: We don't call syncDevice here as sync is already done in the script
         
         if (m_currentOptions.verifyAfterBurn) {
             verifyBurn(m_currentOptions.imagePath, m_currentOptions.devicePath);
@@ -314,8 +319,13 @@ void Burner::onProcessOutput()
                 m_bytesWritten = bytes;
                 
                 // Calculate and emit progress
-                int percentage = (m_totalBytes > 0) ? (int)((m_bytesWritten * 100) / m_totalBytes) : 0;
-                percentage = qMin(percentage, 100); // Cap at 100%
+                int percentage = 0;
+                if (m_totalBytes > 0) {
+                    percentage = (int)((m_bytesWritten * 100) / m_totalBytes);
+                    // Cap progress at 95% until sync is complete
+                    // This prevents showing 100% while sync is still running
+                    percentage = qMin(percentage, 95);
+                }
                 
                 qDebug() << "Progress update:" << m_bytesWritten << "of" << m_totalBytes << "(" << percentage << "%)";
                 
@@ -355,6 +365,18 @@ void Burner::onProcessOutput()
         if (trimmedLine.contains("bytes") || trimmedLine.contains("copied") || 
             trimmedLine.contains("records")) {
             emit statusChanged(QString("Writing... %1").arg(trimmedLine));
+        }
+        
+        // Detect sync phase
+        if (trimmedLine.contains("Syncing device")) {
+            emit statusChanged("Syncing device - finalizing USB drive...");
+            emit progressChanged(98); // Show 98% during sync
+        }
+        
+        // Detect completion
+        if (trimmedLine.contains("Burn operation completed successfully")) {
+            emit statusChanged("USB burning completed successfully!");
+            emit progressChanged(100); // Only now show 100%
         }
     }
 }
