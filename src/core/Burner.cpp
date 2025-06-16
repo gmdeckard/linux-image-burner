@@ -9,6 +9,8 @@
 #include <QFile>
 #include <QDir>
 #include <QRegularExpression>
+#include <QMutex>
+#include <QMutexLocker>
 #include <unistd.h>
 #include <sys/statvfs.h>
 
@@ -22,6 +24,7 @@ Burner::Burner(QObject *parent)
     , m_totalBytes(0)
     , m_bytesWritten(0)
     , m_lastBytesWritten(0)
+    , m_lastUpdateTime()
 {
     m_progressTimer->setInterval(1000); // Update every second
     connect(m_progressTimer, &QTimer::timeout, this, &Burner::onProgressTimer);
@@ -258,36 +261,101 @@ void Burner::onProcessOutput()
 {
     if (!m_process) return;
     
-    QByteArray data = m_process->readAllStandardError();
-    QString output = QString::fromUtf8(data);
+    // Read from both stderr and stdout
+    QByteArray stderrData = m_process->readAllStandardError();
+    QByteArray stdoutData = m_process->readAllStandardOutput();
     
-    // Parse dd progress output
-    // Example: "1234567890 bytes (1.2 GB, 1.1 GiB) copied, 45.6 s, 26.2 MB/s"
-    // or: "512000000 bytes transferred in 10.123456 secs (50571234 bytes/sec)"
+    QString output = QString::fromUtf8(stderrData) + QString::fromUtf8(stdoutData);
     
-    QRegularExpression progressRegex1(R"((\d+)\s+bytes.*copied)");
-    QRegularExpression progressRegex2(R"((\d+)\s+bytes\s+transferred)");
-    
-    QRegularExpressionMatch match1 = progressRegex1.match(output);
-    QRegularExpressionMatch match2 = progressRegex2.match(output);
-    
-    bool ok = false;
-    qint64 bytes = 0;
-    
-    if (match1.hasMatch()) {
-        bytes = match1.captured(1).toLongLong(&ok);
-    } else if (match2.hasMatch()) {
-        bytes = match2.captured(1).toLongLong(&ok);
-    }
-    
-    if (ok && bytes > 0) {
-        m_bytesWritten = bytes;
-        updateProgress();
-    }
-    
-    // Also emit the raw output for debugging
     if (!output.trimmed().isEmpty()) {
-        emit statusChanged(QString("Writing... %1").arg(output.split('\n').last().trimmed()));
+        qDebug() << "DD Output:" << output; // Debug output to see actual format
+    }
+    
+    // Parse dd progress output with status=progress
+    // DD outputs progress in different formats:
+    // Format 1: "512000000 bytes (512 MB, 488 MiB) copied, 12.3456 s, 41.5 MB/s"
+    // Format 2: "512+0 records in\n512+0 records out\n537919488 bytes (538 MB, 513 MiB) copied"
+    // Format 3: Just the bytes on a line by itself when using status=progress
+    
+    QStringList lines = output.split('\n', Qt::SkipEmptyParts);
+    
+    for (const QString &line : lines) {
+        QString trimmedLine = line.trimmed();
+        if (trimmedLine.isEmpty()) continue;
+        
+        // Try multiple regex patterns to catch different dd output formats
+        QRegularExpression patterns[] = {
+            QRegularExpression(R"((\d+)\s+bytes\s+\([^)]+\)\s+copied)"), // Standard format: "104857600 bytes (105 MB, 100 MiB) copied"
+            QRegularExpression(R"((\d+)\s+bytes.*copied)"),               // Basic format: "104857600 bytes copied"
+            QRegularExpression(R"(^(\d+)\s+bytes)"),                      // Simple: "104857600 bytes"
+            QRegularExpression(R"((\d+)\+\d+\s+records\s+out)"),          // Records format: "100+0 records out"
+        };
+        
+        bool foundMatch = false;
+        qint64 bytes = 0;
+        
+        for (const auto &regex : patterns) {
+            QRegularExpressionMatch match = regex.match(trimmedLine);
+            if (match.hasMatch()) {
+                bool ok = false;
+                bytes = match.captured(1).toLongLong(&ok);
+                if (ok && bytes > 0) {
+                    foundMatch = true;
+                    break;
+                }
+            }
+        }
+        
+        if (foundMatch) {
+            QMutexLocker locker(&m_mutex);
+            
+            // Only update if we got a reasonable value (not going backwards)
+            if (bytes >= m_bytesWritten) {
+                m_bytesWritten = bytes;
+                
+                // Calculate and emit progress
+                int percentage = (m_totalBytes > 0) ? (int)((m_bytesWritten * 100) / m_totalBytes) : 0;
+                percentage = qMin(percentage, 100); // Cap at 100%
+                
+                qDebug() << "Progress update:" << m_bytesWritten << "of" << m_totalBytes << "(" << percentage << "%)";
+                
+                emit progressChanged(percentage);
+                
+                // Calculate speed and time remaining
+                QDateTime currentTime = QDateTime::currentDateTime();
+                if (!m_lastUpdateTime.isValid()) {
+                    m_lastUpdateTime = currentTime;
+                    m_lastBytesWritten = 0;
+                }
+                
+                qint64 timeDiff = m_lastUpdateTime.msecsTo(currentTime);
+                
+                if (timeDiff > 500) { // Update every 500ms to avoid too frequent updates
+                    qint64 bytesDiff = m_bytesWritten - m_lastBytesWritten;
+                    if (bytesDiff > 0 && timeDiff > 0) {
+                        QString speed = calculateSpeed(bytesDiff, timeDiff);
+                        emit speedChanged(speed);
+                        
+                        // Calculate time remaining
+                        qint64 bytesRemaining = m_totalBytes - m_bytesWritten;
+                        double speedBytesPerSec = (double)bytesDiff / (timeDiff / 1000.0);
+                        if (speedBytesPerSec > 0) {
+                            QString timeRemaining = calculateTimeRemaining(bytesRemaining, speedBytesPerSec);
+                            emit timeRemainingChanged(timeRemaining);
+                        }
+                    }
+                    
+                    m_lastUpdateTime = currentTime;
+                    m_lastBytesWritten = m_bytesWritten;
+                }
+            }
+        }
+        
+        // Emit status updates for lines containing useful information
+        if (trimmedLine.contains("bytes") || trimmedLine.contains("copied") || 
+            trimmedLine.contains("records")) {
+            emit statusChanged(QString("Writing... %1").arg(trimmedLine));
+        }
     }
 }
 
@@ -358,6 +426,7 @@ bool Burner::burnWithDD(const BurnOptions &options)
             this, &Burner::onProcessFinished);
     connect(m_process, &QProcess::errorOccurred, this, &Burner::onProcessError);
     connect(m_process, &QProcess::readyReadStandardError, this, &Burner::onProcessOutput);
+    connect(m_process, &QProcess::readyReadStandardOutput, this, &Burner::onProcessOutput);
     
     emit statusChanged("Preparing to write image to device...");
     
@@ -385,7 +454,9 @@ bool Burner::burnWithDD(const BurnOptions &options)
     out << "# Linux Image Burner - Burn Script\n";
     out << QString("echo 'Starting burn operation: %1 -> %2'\n")
            .arg(QFileInfo(options.imagePath).fileName()).arg(options.devicePath);
-    out << QString("dd if='%1' of='%2' bs=1M conv=fdatasync status=progress 2>&1\n")
+    out << "# Ensure progress output is not buffered\n";
+    out << "export LC_ALL=C\n";
+    out << QString("dd if='%1' of='%2' bs=1M conv=fdatasync status=progress oflag=direct 2>&1 | tee /dev/stderr\n")
            .arg(options.imagePath).arg(options.devicePath);
     out << "echo 'Syncing device...'\n";
     out << "sync\n";
@@ -474,47 +545,20 @@ bool Burner::addBootFiles(const QString &devicePath, const BurnOptions &options)
 
 void Burner::updateProgress()
 {
-    qint64 currentBytes = getBytesWritten(m_currentOptions.devicePath);
-    
-    if (currentBytes > m_bytesWritten) {
-        m_bytesWritten = currentBytes;
-        
-        int percentage = (m_totalBytes > 0) ? (int)((m_bytesWritten * 100) / m_totalBytes) : 0;
+    // Progress is now handled directly in onProcessOutput()
+    // This method is kept for compatibility with the timer-based approach
+    if (m_totalBytes > 0) {
+        int percentage = (int)((m_bytesWritten * 100) / m_totalBytes);
+        percentage = qMin(percentage, 100); // Cap at 100%
         emit progressChanged(percentage);
-        
-        // Calculate speed
-        QDateTime currentTime = QDateTime::currentDateTime();
-        qint64 timeDiff = m_lastUpdateTime.msecsTo(currentTime);
-        
-        if (timeDiff > 0) {
-            qint64 bytesDiff = m_bytesWritten - m_lastBytesWritten;
-            QString speed = calculateSpeed(bytesDiff, timeDiff);
-            emit speedChanged(speed);
-            
-            // Calculate time remaining
-            qint64 bytesRemaining = m_totalBytes - m_bytesWritten;
-            double speedBytesPerSec = (double)bytesDiff / (timeDiff / 1000.0);
-            QString timeRemaining = calculateTimeRemaining(bytesRemaining, speedBytesPerSec);
-            emit timeRemainingChanged(timeRemaining);
-        }
-        
-        m_lastUpdateTime = currentTime;
-        m_lastBytesWritten = m_bytesWritten;
     }
 }
 
 qint64 Burner::getBytesWritten(const QString &devicePath)
 {
-    // This is a simplified way to track progress
-    // In practice, you'd want more sophisticated progress tracking
-    
-    struct statvfs stat;
-    if (statvfs(devicePath.toLocal8Bit().data(), &stat) == 0) {
-        // This is an approximation - actual implementation would be more complex
-        return 0;
-    }
-    
-    return 0;
+    Q_UNUSED(devicePath)
+    // Return current bytes written as tracked by the process output parsing
+    return m_bytesWritten;
 }
 
 QString Burner::calculateSpeed(qint64 bytes, qint64 timeMs)
