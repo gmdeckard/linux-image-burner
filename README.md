@@ -18,6 +18,18 @@ A modern, feature-rich USB/DVD image burning tool for Linux systems. Similar to 
 - ✅ Cross-platform compatibility verified
 - ✅ Real-time progress monitoring functional
 
+## 🚀 Quick Start
+
+**TL;DR - Get it running in 3 commands:**
+
+```bash
+git clone https://github.com/gmdeckard/linux-image-burner.git
+cd linux-image-burner
+./build.sh && sudo ./install.sh
+```
+
+Then run: `linux-image-burner`
+
 ## ✨ Features
 
 ### 🔥 **Core Functionality**
@@ -77,7 +89,7 @@ sudo pacman -S base-devel cmake qt6-base qt6-tools polkit
 
 1. **Clone the repository:**
 ```bash
-git clone https://github.com/yourusername/linux-image-burner.git
+git clone https://github.com/gmdeckard/linux-image-burner.git
 cd linux-image-burner
 ```
 
@@ -207,209 +219,3 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 **Made with ❤️ for the Linux community**
 
 *linux-image-burner - Making bootable USB creation simple and safe*
-- **Storage**: 50 MB free space for installation
-- **Dependencies**: Qt6 Core and Widgets
-- **Privileges**: Root access required for device operations
-
-## Installation
-
-### Prerequisites
-
-Install the required dependencies for your distribution:
-
-#### Ubuntu/Debian
-```bash
-sudo apt update
-sudo apt install build-essential cmake qt6-base-dev qt6-tools-dev
-```
-
-#### Fedora/RHEL/CentOS
-```bash
-sudo dnf install gcc-c++ cmake qt6-qtbase-devel qt6-qttools-devel
-```
-
-#### Arch Linux
-```bash
-sudo pacman -S base-devel cmake qt6-base qt6-tools
-```
-
-#### openSUSE
-```bash
-sudo zypper install gcc-c++ cmake qt6-base-devel qt6-tools-devel
-```
-
-### Building from Source
-
-1. Clone or download the source code
-2. Create a build directory:
-```bash
-mkdir build
-cd build
-```
-
-3. Configure with CMake:
-```bash
-cmake ..
-```
-
-4. Build the application:
-```bash
-make -j$(nproc)
-```
-
-5. Install (optional):
-```bash
-sudo make install
-```
-
-### Uninstalling
-
-To remove the application from your system:
-
-```bash
-sudo ./uninstall.sh
-```
-
-This will remove:
-- The main executable from `/usr/local/bin/`
-- Desktop application entry
-- Polkit policy files
-- Symbolic links
-- Temporary files
-
-### Running
-
-The application can be started without root privileges:
-
-```bash
-./build/linux-image-burner
-```
-
-**No sudo required to start!** The application will request administrator privileges only when needed for burning operations using pkexec.
-
-After installation, you can also run from the applications menu or use:
-```bash
-linux-image-burner
-```
-
-## Usage
-
-### Basic Usage
-
-1. **Select Image**: Click "Select Image..." to choose your ISO, IMG, or other supported image file
-2. **Select Device**: Choose the target USB drive or storage device from the dropdown
-3. **Configure Options**: Select file system type, partition scheme, and volume label
-4. **Start Burning**: Click "Start" to begin the burning process
-
-### Advanced Options
-
-Click "Show Advanced Options" to access additional features:
-
-- **Quick Format**: Perform a quick format (faster but less thorough)
-- **Verify after burning**: Verify the written data matches the source image
-- **Create bootable USB**: Make the USB drive bootable (enabled by default)
-- **Check for bad blocks**: Scan for bad sectors during formatting
-
-### Device Information
-
-Click "Device Info" to view detailed information about the selected device:
-- Device model and vendor
-- Storage capacity and file system
-- Mount status and mount points
-- Device type (USB, MMC, etc.)
-- UUID and other technical details
-
-## File System Compatibility
-
-| File System | Max Volume Size | Max File Size | Bootable | Cross-Platform |
-|-------------|----------------|---------------|----------|----------------|
-| FAT32       | 2 TB           | 4 GB          | Yes      | Excellent      |
-| NTFS        | 256 TB         | 16 TB         | Yes      | Good (Windows) |
-| exFAT       | 128 PB         | 16 EB         | No       | Good (Modern)  |
-| ext4        | 1 EB           | 16 TB         | Yes      | Linux Only     |
-
-## Safety Features
-
-The application includes several safety measures to prevent data loss:
-
-- **System Drive Protection**: Prevents writing to drives containing the root filesystem
-- **Removable Device Filter**: Only shows removable devices by default
-- **Confirmation Dialogs**: Confirms destructive operations
-- **Mount Point Detection**: Warns about mounted devices
-- **Permission Checking**: Verifies write permissions before starting
-
-## Troubleshooting
-
-### Common Issues
-
-**"Permission denied" errors**
-- Application will request admin privileges via pkexec when needed
-- Make sure policykit is installed: `sudo apt install policykit-1`
-- If pkexec dialog doesn't appear, try running: `pkexec --version`
-
-**"Device is busy" errors**
-- Unmount the device before burning
-- Close any file managers or applications accessing the device
-- Use the "Device Info" dialog to unmount
-
-**"Image too large" errors**
-- Check that the image file is smaller than the target device
-- Consider using a larger USB drive
-- Some images may be compressed and expand during burning
-
-**Slow burning speed**
-- Use a USB 3.0 port and device if available
-- Avoid using USB hubs
-- Close unnecessary applications to free up system resources
-
-### Log Files
-
-Enable the log viewer to see detailed information about operations:
-- Click "Show Log" to view real-time logging
-- Errors and warnings are highlighted
-- Useful for diagnosing issues
-
-## Development
-
-### Architecture
-
-The application is built with a modular architecture:
-
-- **Core**: Device management, image handling, burning engine
-- **UI**: Qt-based user interface with responsive design
-- **Utils**: Utility functions and validation
-- **Tests**: Unit tests for core functionality
-
-### Contributing
-
-Contributions are welcome! Please:
-
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes with appropriate tests
-4. Submit a pull request
-
-### Building with Debug Info
-
-For development builds with debug information:
-
-```bash
-cmake -DCMAKE_BUILD_TYPE=Debug ..
-make -j$(nproc)
-```
-
-## License
-
-This project is licensed under the GNU General Public License v3.0. See the LICENSE file for details.
-
-## Acknowledgments
-
-- Inspired by Rufus for Windows
-- Built with Qt framework
-- Uses standard Linux utilities (dd, parted, blkid, etc.)
-
-## Support
-
-For bug reports and feature requests, please use the issue tracker.
-
-For general questions and discussions, see the project wiki.
