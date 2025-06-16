@@ -16,15 +16,18 @@ A modern, feature-rich USB/DVD image burning tool for Linux systems. Similar to 
 - ✅ Privilege escalation (pkexec) working correctly
 - ✅ No root privileges required at startup
 - ✅ Cross-platform compatibility verified
-- ✅ **Real-time progress monitoring FIXED and working**
+- ✅ **Real-time progress monitoring FULLY WORKING**
 - ✅ Speed calculation and time remaining estimates
 - ✅ Thread-safe progress updates with comprehensive parsing
+- ✅ **Accurate progress indication (95% write, 98% sync, 100% complete)**
 
 **🔧 Recent Improvements:**
-- Fixed progress bar that wasn't updating during USB burning
+- Fixed progress bar accuracy - no more premature 100% completion
+- Progress now caps at 95% during write phase, 98% during sync phase
 - Enhanced dd output parsing with multiple regex patterns
 - Improved real-time progress monitoring and speed calculation
 - Added comprehensive debug output for troubleshooting
+- Better status messages for sync operations
 
 ## 🚀 Quick Start
 
