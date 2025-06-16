@@ -1,7 +1,7 @@
 #!/bin/bash
-# Test script for Linux Image Burner core functionality
+# Test script for linux-image-burner core functionality
 
-echo "Testing Linux Image Burner Core Components..."
+echo "Testing linux-image-burner Core Components..."
 echo "=============================================="
 
 # Test 1: Check if executable exists and is working
@@ -42,5 +42,8 @@ echo "Test 5: Basic functionality test..."
 echo "Note: This test requires sudo privileges and may show permission warnings"
 
 echo
-echo "Test completed. To run the full application:"
-echo "sudo ./build/linux-image-burner"
+echo "Test completed. To run the application:"
+echo "linux-image-burner    # No sudo required!"
+echo ""
+echo "Or from the build directory:"
+echo "./build/linux-image-burner"

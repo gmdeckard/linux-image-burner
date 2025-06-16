@@ -1,7 +1,7 @@
 #!/bin/bash
 
-# Test script for Linux Image Burner
-echo "Testing Linux Image Burner functionality..."
+# Test script for linux-image-burner
+echo "Testing linux-image-burner functionality..."
 
 # Check if pkexec is available
 if command -v pkexec >/dev/null 2>&1; then

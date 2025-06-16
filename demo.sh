@@ -1,7 +1,7 @@
 #!/bin/bash
 
-# Demo script to show the improved Linux Image Burner functionality
-echo "=== Linux Image Burner - Demo ==="
+# Demo script to show the improved linux-image-burner functionality
+echo "=== linux-image-burner - Demo ==="
 echo
 
 # Check system requirements
