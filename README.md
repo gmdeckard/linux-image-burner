@@ -12,11 +12,19 @@ A modern, feature-rich USB/DVD image burning tool for Linux systems. Similar to 
 **✅ FULLY FUNCTIONAL** - Successfully tested and verified working!
 
 - ✅ USB detection and device management working
-- ✅ Image burning tested and confirmed bootable
+- ✅ Image burning tested and confirmed bootable  
 - ✅ Privilege escalation (pkexec) working correctly
 - ✅ No root privileges required at startup
 - ✅ Cross-platform compatibility verified
-- ✅ Real-time progress monitoring functional
+- ✅ **Real-time progress monitoring FIXED and working**
+- ✅ Speed calculation and time remaining estimates
+- ✅ Thread-safe progress updates with comprehensive parsing
+
+**🔧 Recent Improvements:**
+- Fixed progress bar that wasn't updating during USB burning
+- Enhanced dd output parsing with multiple regex patterns
+- Improved real-time progress monitoring and speed calculation
+- Added comprehensive debug output for troubleshooting
 
 ## 🚀 Quick Start
 
@@ -35,7 +43,8 @@ Then run: `linux-image-burner`
 ### 🔥 **Core Functionality**
 - **Multi-format support**: ISO, IMG, DMG, VHD, VHDX, VMDK
 - **Reliable burning**: Uses `dd` with optimized parameters for bootable USB creation
-- **Real-time progress**: Live progress monitoring with speed and ETA
+- **Real-time progress**: Live progress monitoring with speed, percentage, and ETA
+- **Progress parsing**: Advanced dd output parsing with multiple regex patterns
 - **Bootloader detection**: Automatic detection of bootable images
 
 ### 🛡️ **Security & Safety**
