@@ -7,20 +7,6 @@ A modern, feature-rich USB/DVD image burning tool for Linux systems. Similar to 
 ![Qt](https://img.shields.io/badge/Qt-6-blue.svg)
 ![C++](https://img.shields.io/badge/C++-17-blue.svg)
 
-## 🎉 Status
-
-**✅ FULLY FUNCTIONAL** - Successfully tested and verified working!
-
-- ✅ USB detection and device management working
-- ✅ Image burning tested and confirmed bootable  
-- ✅ Privilege escalation (pkexec) working correctly
-- ✅ No root privileges required at startup
-- ✅ Cross-platform compatibility verified
-- ✅ **Real-time progress monitoring FULLY WORKING**
-- ✅ Speed calculation and time remaining estimates
-- ✅ Thread-safe progress updates with comprehensive parsing
-- ✅ **Accurate progress indication (95% write, 98% sync, 100% complete)**
-
 **🔧 Recent Improvements:**
 - Fixed progress bar accuracy - no more premature 100% completion
 - Progress now caps at 95% during write phase, 98% during sync phase
@@ -43,27 +29,27 @@ Then run: `linux-image-burner`
 
 ## ✨ Features
 
-### 🔥 **Core Functionality**
+### **Core Functionality**
 - **Multi-format support**: ISO, IMG, DMG, VHD, VHDX, VMDK
 - **Reliable burning**: Uses `dd` with optimized parameters for bootable USB creation
 - **Real-time progress**: Live progress monitoring with speed, percentage, and ETA
 - **Progress parsing**: Advanced dd output parsing with multiple regex patterns
 - **Bootloader detection**: Automatic detection of bootable images
 
-### 🛡️ **Security & Safety**
+### **Security & Safety**
 - **No root required**: Starts as regular user, uses PolicyKit for privilege escalation
 - **System disk protection**: Prevents accidental overwriting of system drives
 - **Mount detection**: Automatically handles mounted partitions
 - **Device validation**: Comprehensive safety checks before burning
 
-### 💻 **User Experience**
+### **User Experience**
 - **Modern Qt6 interface** with dark theme
 - **Real-time device detection**: Automatic USB device monitoring
 - **Comprehensive device info**: Size, vendor, model, file system details
 - **Progress feedback**: Speed, percentage, time remaining
 - **Error handling**: Clear error messages and recovery suggestions
 
-### 🔧 **Advanced Options**
+### **Advanced Options**
 - **File system formatting**: FAT32, NTFS, ext4 support
 - **Custom volume labels**: Set drive names during formatting
 - **Cluster size control**: Optimize for different use cases
@@ -149,11 +135,11 @@ image-burner
 
 ### Safety Features
 
-- ✅ **Automatic detection** of removable devices only
-- ✅ **System disk protection** prevents accidental overwrites
-- ✅ **Mount handling** automatically unmounts before burning
-- ✅ **Size validation** ensures image fits on device
-- ✅ **Permission management** via PolicyKit (no sudo needed)
+- **Automatic detection** of removable devices only
+- **System disk protection** prevents accidental overwrites
+- **Mount handling** automatically unmounts before burning
+- **Size validation** ensures image fits on device
+- **Permission management** via PolicyKit (no sudo needed)
 
 ## Technical Details
 
@@ -177,12 +163,12 @@ image-burner
 
 | Format | Status | Notes |
 |--------|--------|-------|
-| ISO    | ✅ Full | Standard ISO 9660 images |
-| IMG    | ✅ Full | Raw disk images |
-| DMG    | ✅ Full | Apple disk images |
-| VHD    | ✅ Full | Virtual Hard Disk |
-| VHDX   | ✅ Full | Virtual Hard Disk v2 |
-| VMDK   | ✅ Full | VMware disk images |
+| ISO    | Full | Standard ISO 9660 images |
+| IMG    | Full | Raw disk images |
+| DMG    | Full | Apple disk images |
+| VHD    | Full | Virtual Hard Disk |
+| VHDX   | Full | Virtual Hard Disk v2 |
+| VMDK   | Full | VMware disk images |
 
 ## Troubleshooting
 
@@ -207,7 +193,6 @@ image-burner
 | Feature | linux-image-burner | Rufus | Etcher | dd command |
 |---------|-------------------|-------|---------|------------|
 | GUI Interface | ✅ Modern Qt6 | ✅ Windows only | ✅ Electron | ❌ CLI only |
-| No sudo required | ✅ PolicyKit | N/A | ❌ Requires sudo | ❌ Requires sudo |
 | Real-time progress | ✅ Live updates | ✅ | ✅ | ❌ |
 | Multi-format support | ✅ 6+ formats | ✅ | ✅ Limited | ✅ Any |
 | Safety features | ✅ Comprehensive | ✅ | ✅ Basic | ❌ Manual |
