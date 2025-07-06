@@ -7,7 +7,7 @@ A modern, feature-rich USB/DVD image burning tool for Linux systems. Similar to 
 ![Qt](https://img.shields.io/badge/Qt-6-blue.svg)
 ![C++](https://img.shields.io/badge/C++-17-blue.svg)
 
-**🔧 Recent Improvements:**
+** Recent Improvements:**
 - Fixed progress bar accuracy - no more premature 100% completion
 - Progress now caps at 95% during write phase, 98% during sync phase
 - Enhanced dd output parsing with multiple regex patterns
@@ -15,7 +15,7 @@ A modern, feature-rich USB/DVD image burning tool for Linux systems. Similar to 
 - Added comprehensive debug output for troubleshooting
 - Better status messages for sync operations
 
-## 🚀 Quick Start
+## Quick Start
 
 **TL;DR - Get it running in 3 commands:**
 
@@ -27,7 +27,7 @@ cd linux-image-burner
 
 Then run: `linux-image-burner`
 
-## ✨ Features
+## Features
 
 ### **Core Functionality**
 - **Multi-format support**: ISO, IMG, DMG, VHD, VHDX, VMDK
