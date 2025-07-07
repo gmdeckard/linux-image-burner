@@ -7,18 +7,11 @@ A modern, feature-rich USB/DVD image burning tool for Linux systems. Similar to 
 ![Qt](https://img.shields.io/badge/Qt-6-blue.svg)
 ![C++](https://img.shields.io/badge/C++-17-blue.svg)
 
-** Recent Improvements:**
-- Fixed progress bar accuracy - no more premature 100% completion
-- Progress now caps at 95% during write phase, 98% during sync phase
-- Enhanced dd output parsing with multiple regex patterns
-- Improved real-time progress monitoring and speed calculation
-- Added comprehensive debug output for troubleshooting
-- Better status messages for sync operations
-
 ## Quick Start
 
 **TL;DR - Get it running in 3 commands:**
 
+** Install dependencies listed below **
 ```bash
 git clone https://github.com/gmdeckard/linux-image-burner.git
 cd linux-image-burner
