@@ -11,8 +11,10 @@ A modern, feature-rich USB/DVD image burning tool for Linux systems. Similar to 
 
 **TL;DR - Get it running in 3 commands:**
 
-** Install dependencies listed below first!! **
+**Install dependencies listed below first!!**
+
 Then: 
+
 ```bash
 git clone https://github.com/gmdeckard/linux-image-burner.git
 cd linux-image-burner
